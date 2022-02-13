@@ -1,6 +1,6 @@
 {
   "name": "@lukeschaefer/worker-bee",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Tiny utility for pushing tasks into an async Web Worker",
   "main": "dist/WorkerB.js",
   "types": "dist/WorkerB.d.ts",
