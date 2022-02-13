@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.miniWorker = void 0;
 /** Creates a worker that can execute one function in another thread */
-async function miniWorker(func) {
+function miniWorker(func) {
     let workerString = workerCode.toString();
     workerString = workerString.substring(workerString.indexOf('{') + 1, workerString.lastIndexOf('}'));
     const blob = new Blob([workerString], { type: 'application/javascript' });
@@ -27,14 +27,12 @@ async function miniWorker(func) {
             worker.addEventListener('message', listener);
         });
     }
-    const result = await sendMessage({
+    const isReady = sendMessage({
         type: 'setFunction',
         function: func.toString(),
     });
-    if (!result) {
-        throw new Error("Could not initialize worker");
-    }
     return async (...args) => {
+        // await isReady;
         return await sendMessage({
             type: 'callFunction',
             args
