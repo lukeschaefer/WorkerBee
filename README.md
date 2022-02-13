@@ -10,24 +10,26 @@ TBD. This was a tiny script I made in college, now it's seven years later and I 
     
 ## Usage example:
 
-    import { miniWorker} from './WorkerB';
+```typescript
+import { miniWorker} from './WorkerB';
 
-    const multiplier = await miniWorker((x: number, y:number) => {
-      return x * y;
-    });
-    
-    // result becomes 36
-    const result = await multiplier(12,3);
+const multiplier = await miniWorker((x: number, y:number) => {
+  return x * y;
+});
 
-    const bigOperation = (bigNumber: number) => {
-      let x = 0;
-      while(x < bigNumber) x++;
-      return "done!";
-    }
+// result becomes 36
+const result = await multiplier(12,3);
 
-    // Will likely cause your browser to become unresponsive:
-    bigOperation(1000000000000000);
+const bigOperation = (bigNumber: number) => {
+  let x = 0;
+  while(x < bigNumber) x++;
+  return "done!";
+}
 
-    // Wont cause any issues:
-    workerBigOperation = await miniWorker(bigOperation)
-    workerBigOperation(1000000000000000);
+// Will likely cause your browser to become unresponsive:
+bigOperation(1000000000000000);
+
+// Wont cause any issues:
+workerBigOperation = await miniWorker(bigOperation)
+workerBigOperation(1000000000000000);
+```
