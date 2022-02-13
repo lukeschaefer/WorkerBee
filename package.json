@@ -1,10 +1,11 @@
 {
-  "name": "worker-bee",
-  "version": "1.0.0",
+  "name": "@lukeschaefer/worker-bee",
+  "version": "1.0.1",
   "description": "Tiny utility for pushing tasks into an async Web Worker",
-  "main": "index.js",
+  "main": "dist/WorkerB.js",
+  "types": "dist/WorkerB.d.ts",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "npx tsc"
   },
   "repository": {
     "type": "git",

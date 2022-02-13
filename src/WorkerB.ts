@@ -1,11 +1,12 @@
 /** Creates a worker that can execute one function in another thread */
-export async function miniWorker<P extends (...args: any[]) => any>(func: (P)): Promise<(...args: Parameters<P>) => Promise<ReturnType<P>>> {
+export function miniWorker<P extends (...args: any[]) => any>(func: (P)): (...args: Parameters<P>) => Promise<ReturnType<P>> {
   let workerString = workerCode.toString();
   workerString = workerString.substring(workerString.indexOf('{') + 1, workerString.lastIndexOf('}'));
   const blob = new Blob([workerString], { type: 'application/javascript' });
   const worker = new Worker(URL.createObjectURL(blob));
 
   let counter = 0;
+
   function sendMessage(message: WorkerBMessage): Promise<any> {
     message.id = `${message.type}_${counter++}`;
 
@@ -28,16 +29,13 @@ export async function miniWorker<P extends (...args: any[]) => any>(func: (P)): 
     });
   }
 
-  const result = await sendMessage({
+  const isReady = sendMessage({
     type: 'setFunction',
     function: func.toString(),
   });
 
-  if (!result) {
-    throw new Error("Could not initialize worker");
-  }
-
   return async (...args: Parameters<P>) => {
+    // await isReady;
     return await sendMessage({
       type: 'callFunction',
       args
