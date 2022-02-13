@@ -4,8 +4,6 @@ WorkerBee is a minimal TypeScript library to make using Web Workers as easy as p
 Instead of having to create a seperate file for code that is run in a different thread, 
 workers can be made inline with their own functions and be communicated with asynchronously.
 
-# Usage
-
 ## Installation
 
 ```npm install @lukeschaefer/worker-bee```
