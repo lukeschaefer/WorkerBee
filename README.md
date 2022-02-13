@@ -1,38 +1,33 @@
 # WorkerB
 
-WorkerB is a minimal JavaScript library to make using Web Workers as painless as possible. Instead of having to create a seperate file for code that is run in a different thread, workers can be made inline with their own functions and be communicated with asynchronously. The idea is to consolidate the seperate script, and the logic to interact with that script into one JS object.
+WorkerB is a minimal TypeScript library to make using Web Workers as easy as possible. Instead of having to create a seperate file for code that is run in a different thread, workers can be made inline with their own functions and be communicated with asynchronously.
 
 # Usage
 
 ## Installation
 
-WorkerB has no dependencies - simply include the minified file in your project folder, and import it in a script tag:
-
-    <script src='lib/WorkerB.min.js'></script>
+TBD. This was a tiny script I made in college, now it's seven years later and I migrated it to TypeScript and made it simpler. Later this week I'll make it usable. For now, feel free to copy-paste the src.
     
 ## Usage example:
 
-    // Create a new, empty WorkerB
-    var worker = new WorkerB();
-    
-    // Give it a method it can perform asynchronously. This method needs:
-      //  A name -> 'countToX'
-      //  A function it will perform
-      //  The callback that will be called when done
-      
-    worker.method("countToX", function(x){
-        for(var i = 0; i<x; i++){
-          continue;
-        }
-        return i;
-    }, function(x){
-      console.log('X is ' + x);
+    import { miniWorker} from './WorkerB';
+
+    const multiplier = await miniWorker((x: number, y:number) => {
+      return x * y;
     });
     
-    // Call the method. Operation is non-blocking, and performed in a seperate thread.
-    worker.countToX(34);
-    
-Every WorkerB is also given a method 'loadScripts()' - which will place a call in the actual worker thread to [importScripts()](https://developer.mozilla.org/en-US/docs/Web/API/WorkerGlobalScope/importScripts). It is used similarly: 
+    // result becomes 36
+    const result = await multiplier(12,3);
 
-    var worker = new WorkerB();
-    worker.loadLibrary('lib/library.js');
+    const bigOperation = (bigNumber: number) => {
+      let x = 0;
+      while(x < bigNumber) x++;
+      return "done!";
+    }
+
+    // Will likely cause your browser to become unresponsive:
+    bigOperation(1000000000000000);
+
+    // Wont cause any issues:
+    workerBigOperation = await miniWorker(bigOperation)
+    workerBigOperation(1000000000000000);
