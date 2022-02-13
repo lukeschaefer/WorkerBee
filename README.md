@@ -29,17 +29,16 @@ The reason you may want to use this tool is for large operations that don't give
 For example:
 
 ```typescript
-const bigOperation = function() {
+const bigOperation = (target: number) => {
   let x = 0;
-  const target = 999999999999;
   while(x < target) x++;
-  return "done!";
+  return x;
 }
 
 // Will likely cause your browser to become unresponsive:
-bigOperation();
+bigOperation(999999999999);
 
-// Wont cause any issues:
+// Won't cause any issues:
 workerBigOperation = miniWorker(bigOperation)
-workerBigOperation();
+await workerBigOperation(999999999999);
 ```
