@@ -13,9 +13,9 @@ workers can be made inline with their own functions and be communicated with asy
 The basic usage is as follows:
 
 ```typescript
-import { miniWorker} from '@lukeschaefer/worker-bee';
+import { miniWorker } from '@lukeschaefer/worker-bee';
 
-const multiplier = miniWorker((x: number, y:number) => {
+const multiplier = miniWorker((x, y) => {
   return x * y;
 });
 
@@ -27,7 +27,7 @@ The reason you may want to use this tool is for large operations that don't give
 For example:
 
 ```typescript
-const bigOperation = (target: number) => {
+const bigOperation = (target) => {
   let x = 0;
   while(x < target) x++;
   return x;
