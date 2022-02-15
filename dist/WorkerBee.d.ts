@@ -17,11 +17,11 @@ export declare type WorkerBResponse = {
 };
 export declare type WorkerBMessage = {
     id?: string;
-} & (SetProperty | CallFunctionMessage | ImportScriptsMessage | GetProperty);
+} & (SetProperty | CallFunctionMessage | ImportScriptsMessage | GetProperty | SetFunctionMessage);
 export declare type SetProperty = {
     type: 'setProperty';
     name: string;
-    value: string;
+    value: any;
 };
 export declare type GetProperty = {
     type: 'getProperty';
@@ -35,4 +35,9 @@ export declare type CallFunctionMessage = {
     type: 'callFunction';
     name: string;
     args: any[];
+};
+export declare type SetFunctionMessage = {
+    type: 'setFunction';
+    name: string;
+    body: string;
 };

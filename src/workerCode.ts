@@ -13,8 +13,8 @@ export function workerCode(self: Worker){
     sendMessage({
       id,
       type: "success",
-      body: true
-    });    
+      body: value
+    });
   }
 
   function setFunction(name: string, body: string, id: string) {
@@ -26,7 +26,7 @@ export function workerCode(self: Worker){
       id,
       type: "success",
       body: true
-    });    
+    });
   }
 
   function callFunction(message: CallFunctionMessage & { id?: string }) {
@@ -36,7 +36,7 @@ export function workerCode(self: Worker){
         id: message.id!,
         type: 'success',
         body: result,
-      });      
+      });
     }
   }
 
@@ -45,7 +45,7 @@ export function workerCode(self: Worker){
       id: message.id!,
       type: 'success',
       body: context[message.name],
-    });    
+    });
   }
 
   self.onmessage = function (e) {
@@ -54,17 +54,17 @@ export function workerCode(self: Worker){
     try {
       if (message.type == 'setProperty') {
         setProperty(message.name, message.value, message.id!);
-      } else if(message.type == 'setFunction') {
+      } else if (message.type == 'setFunction') {
         setFunction(message.name, message.body, message.id!);
       } else if (message.type == 'callFunction') {
         callFunction(message);
       } else if (message.type == 'getProperty') {
         getProperty(message);
-      } else if(message.type == 'importScripts') {
+      } else if (message.type == 'importScripts') {
         // TODO: Worker type should know about importScripts, right?
         (self as any).importScripts(message.scripts);
       }
-    } catch(e) {
+    } catch (e) {
       console.error(e);
       sendMessage({
         id: message.id!,

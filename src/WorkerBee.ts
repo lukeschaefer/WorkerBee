@@ -52,7 +52,7 @@ export type WorkerBMessage = { id?: string }
 export type SetProperty = {
   type: 'setProperty';
   name: string;
-  value: string;
+  value: any;
 }
 
 export type GetProperty = {

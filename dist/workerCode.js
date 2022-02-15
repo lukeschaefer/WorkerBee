@@ -7,52 +7,31 @@ function workerCode(self) {
         self.postMessage(JSON.stringify(message));
     }
     function setProperty(name, value, id) {
+        context[name] = value;
+        sendMessage({
+            id,
+            type: "success",
+            body: value
+        });
+    }
+    function setFunction(name, body, id) {
         let test = () => { };
-        try {
-            eval(`test = ${value}`);
-        }
-        catch (e) {
-            sendMessage({
-                id,
-                type: "failure",
-                body: e,
-            });
-            return;
-        }
-        if (test instanceof Function) {
-            context[name] = test;
-            sendMessage({
-                id,
-                type: "success",
-                body: true
-            });
-        }
-        else {
-            sendMessage({
-                id,
-                type: "failure",
-                body: false
-            });
-        }
+        eval(`test = ${body}`);
+        context[name] = test;
+        sendMessage({
+            id,
+            type: "success",
+            body: true
+        });
     }
     function callFunction(message) {
         if (context[message.name] && context[message.name] instanceof Function) {
-            try {
-                const result = context[message.name].apply(context, message.args);
-                sendMessage({
-                    id: message.id,
-                    type: 'success',
-                    body: result,
-                });
-            }
-            catch (e) {
-                console.error(e);
-                sendMessage({
-                    id: message.id,
-                    type: 'failure',
-                    body: e,
-                });
-            }
+            const result = context[message.name].apply(context, message.args);
+            sendMessage({
+                id: message.id,
+                type: 'success',
+                body: result,
+            });
         }
     }
     function getProperty(message) {
@@ -64,18 +43,31 @@ function workerCode(self) {
     }
     self.onmessage = function (e) {
         const message = JSON.parse(e.data);
-        if (message.type == 'setProperty') {
-            setProperty(message.name, message.value, message.id);
+        try {
+            if (message.type == 'setProperty') {
+                setProperty(message.name, message.value, message.id);
+            }
+            else if (message.type == 'setFunction') {
+                setFunction(message.name, message.body, message.id);
+            }
+            else if (message.type == 'callFunction') {
+                callFunction(message);
+            }
+            else if (message.type == 'getProperty') {
+                getProperty(message);
+            }
+            else if (message.type == 'importScripts') {
+                // TODO: Worker type should know about importScripts, right?
+                self.importScripts(message.scripts);
+            }
         }
-        else if (message.type == 'callFunction') {
-            callFunction(message);
-        }
-        else if (message.type == 'getProperty') {
-            getProperty(message);
-        }
-        else if (message.type == 'importScripts') {
-            // TODO: Worker type should know about importScripts, right?
-            self.importScripts(message.scripts);
+        catch (e) {
+            console.error(e);
+            sendMessage({
+                id: message.id,
+                type: 'failure',
+                body: e,
+            });
         }
     };
 }

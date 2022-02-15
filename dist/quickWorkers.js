@@ -12,28 +12,44 @@ function miniWorker(func) {
 exports.miniWorker = miniWorker;
 function createWorker(init) {
     const worker = new WorkerBee_1.WorkerBee();
-    const functionMap = {};
-    Object.keys(init).forEach(name => {
-        const propertyReady = worker.sendMessage({
-            type: 'setProperty',
-            name,
-            value: init[name].toString(),
-        });
+    const propertiesMap = {};
+    const setters = {};
+    for (const name in init) {
         // If it's a function, make a wrapper
         if (init[name] instanceof Function) {
-            let func = async (...args) => {
+            let propertyReady = worker.sendMessage({
+                type: 'setFunction',
+                name,
+                body: init[name].toString(),
+            });
+            propertiesMap[name] = (async (...args) => {
                 await propertyReady;
                 return await worker.sendMessage({
                     type: 'callFunction',
                     name: name,
                     args
                 });
-            };
-            functionMap[name] = func;
+            });
         }
         else {
             // if it's not, write an async getter/setter wrapper
-            Object.defineProperty(functionMap, name, {
+            let propertyReady = worker.sendMessage({
+                type: 'setProperty',
+                name,
+                value: init[name],
+            });
+            const setterName = `set${name[0].toUpperCase()}${name.slice(1)}`;
+            const setterFunction = async (value) => {
+                await propertyReady;
+                return await worker.sendMessage({
+                    type: 'setProperty',
+                    name,
+                    value
+                });
+            };
+            setters[setterName] = setterFunction;
+            Object.defineProperty(propertiesMap, name, {
+                enumerable: true,
                 get: async function () {
                     await propertyReady;
                     return await worker.sendMessage({
@@ -43,15 +59,18 @@ function createWorker(init) {
                 }
             });
         }
-    });
-    functionMap.destroy = () => worker.worker.terminate();
-    functionMap.importScripts = async (scripts) => {
-        return await worker.sendMessage({
-            type: 'importScripts',
-            scripts
-        });
+    }
+    const utils = {
+        destroy: () => worker.worker.terminate(),
+        importScripts: async (scripts) => {
+            return await worker.sendMessage({
+                type: 'importScripts',
+                scripts
+            });
+        }
     };
-    return functionMap;
+    // Using Object.assign lets us keep the getters in propertiesMap.
+    return Object.assign(propertiesMap, setters, utils);
 }
 exports.createWorker = createWorker;
 //# sourceMappingURL=quickWorkers.js.map

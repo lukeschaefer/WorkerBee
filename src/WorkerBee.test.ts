@@ -11,7 +11,7 @@ describe('createWorker workers', () => {
     const worker = createWorker({
       add: (a: number, b: number) => a + b,
     });
-    expect(await worker.add(1,2)).toBe(3);
+    expect(await worker.add(1, 2)).toBe(3);
   });
 
   it('can execute scoped functions', async () => {
@@ -22,19 +22,41 @@ describe('createWorker workers', () => {
       }
     });
 
-    expect(await worker.complexThing(1,2)).toBe(6);
+    expect(await worker.complexThing(1, 2)).toBe(6);
   });
 
-  it('generates property setters and accessors', async () => {
+  it('generates property getters', async () => {
     const worker = createWorker({
       a: 123,
       b: 'abc',
-      c: function() {
-        return "You and me"
-      }
     });
 
     expect(await worker.a).toBe(123);
+    expect(await worker.b).toBe('abc');
+  });
+
+  it('generates property setters', async () => {
+    const worker = createWorker({
+      a: 1,
+      b: 'abc',
+    });
+    await worker.setA(2);
+    await worker.setB('345');
+
+    expect(await worker.a).toBe(2);
+    expect(await worker.b).toBe('345');
+  });
+
+  it('functions can access propeties', async () => {
+    const worker = createWorker({
+      a: 123,
+      b: 'abc',
+      c: function () {
+        return this.a + this.b.length;
+      }
+    });
+
+    expect(await worker.c()).toBe(126);
   });
 });
 
@@ -53,8 +75,8 @@ const swappedOutWorkerCode = ((self: Worker) => {
     sendMessage({
       id,
       type: "success",
-      body: true
-    });    
+      body: value
+    });
   }
 
   function setFunction(name: string, body: string, id: string) {
@@ -66,7 +88,7 @@ const swappedOutWorkerCode = ((self: Worker) => {
       id,
       type: "success",
       body: true
-    });    
+    });
   }
 
   function callFunction(message: CallFunctionMessage & { id?: string }) {
@@ -76,7 +98,7 @@ const swappedOutWorkerCode = ((self: Worker) => {
         id: message.id!,
         type: 'success',
         body: result,
-      });      
+      });
     }
   }
 
@@ -85,7 +107,7 @@ const swappedOutWorkerCode = ((self: Worker) => {
       id: message.id!,
       type: 'success',
       body: context[message.name],
-    });    
+    });
   }
 
   self.onmessage = function (e) {
@@ -94,17 +116,17 @@ const swappedOutWorkerCode = ((self: Worker) => {
     try {
       if (message.type == 'setProperty') {
         setProperty(message.name, message.value, message.id!);
-      } else if(message.type == 'setFunction') {
+      } else if (message.type == 'setFunction') {
         setFunction(message.name, message.body, message.id!);
       } else if (message.type == 'callFunction') {
         callFunction(message);
       } else if (message.type == 'getProperty') {
         getProperty(message);
-      } else if(message.type == 'importScripts') {
+      } else if (message.type == 'importScripts') {
         // TODO: Worker type should know about importScripts, right?
         (self as any).importScripts(message.scripts);
       }
-    } catch(e) {
+    } catch (e) {
       console.error(e);
       sendMessage({
         id: message.id!,
