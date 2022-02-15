@@ -2,7 +2,7 @@
 
 import { WorkerBee } from "./WorkerBee";
 
-export function miniWorker<P extends (...args: any[]) => any>(func: (P)): (...args: Parameters<P>) => Promise<ReturnType<P>> {
+export function miniWorker<P extends WorkerFunction>(func: (P)): (...args: Parameters<P>) => Promise<ReturnType<P>> {
   const worker = createWorker({
     mini: func
   });
@@ -14,22 +14,36 @@ export function createWorker<T extends WorkerMap>(init: T): ToPromiseMap<T> & Wo
 
   const functionMap = {} as ToPromiseMap<T> ;
 
-  Object.keys(init).forEach(methodName => {
-    const functionReady = worker.sendMessage({
-      type: 'setFunction',
-      name: methodName,
-      function: init[methodName].toString(),
+  Object.keys(init).forEach(name => {
+    const propertyReady = worker.sendMessage({
+      type: 'setProperty',
+      name,
+      value: init[name].toString(),
     });
 
-    if(init[methodName] instanceof Function) {
-      functionMap[methodName as keyof T] = async (...args: any[]): Promise<ReturnType<T[keyof T]>> => {
-        await functionReady;
+    // If it's a function, make a wrapper
+    if(init[name] instanceof Function) {      
+      let func = async (...args: any[])  => {
+        await propertyReady;
         return await worker.sendMessage({
           type: 'callFunction',
-          name: methodName,
+          name: name,
           args
         });
       };
+      functionMap[name as keyof T] = func as ToWorkerProperty<T[keyof T]>;
+    } else {
+      // if it's not, write an async getter/setter wrapper
+      Object.defineProperty(functionMap, name, {
+        get: async function(){
+          await propertyReady;
+          return await worker.sendMessage({
+            type: 'getProperty',
+            name: name,
+          });
+        }
+    });
+
     }
   });
 
@@ -49,8 +63,16 @@ export type WorkerUtils = {
   importScripts: (scripts: string[]) => Promise<void>;
 }
 
-export type WorkerMap = {[key: string] : (...args: any) => any};
+export type WorkerFunction = (...args: any[]) => any;
+
+export type ToWorkerProperty<T> = 
+T extends WorkerFunction ? ToPromiseFunction<T> : Promise<T>;
+
+export type ToPromiseFunction<T extends WorkerFunction> =
+(...args: Parameters<T>) => Promise<ReturnType<T>>;
+
+export type WorkerMap = {[key: string] : (any) };
 
 export type ToPromiseMap<T extends WorkerMap> = {
-  [Property in keyof T]: ((...args: Parameters<T[Property]>) => Promise<ReturnType<T[Property]>>)
+  [Property in keyof T]: ToWorkerProperty<T[Property]>
 };

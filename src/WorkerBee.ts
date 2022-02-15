@@ -47,20 +47,25 @@ export type WorkerBResponse = {
 }
 
 export type WorkerBMessage = { id?: string }
-  & (SetFunctionMessage | CallFunctionMessage | ImportScriptsMessage);
+  & (SetProperty | CallFunctionMessage | ImportScriptsMessage | GetProperty);
 
-type SetFunctionMessage = {
-  type: 'setFunction';
+export type SetProperty = {
+  type: 'setProperty';
   name: string;
-  function: string;
+  value: string;
 }
 
-type ImportScriptsMessage = {
+export type GetProperty = {
+  type: 'getProperty';
+  name: string;
+}
+
+export type ImportScriptsMessage = {
   type: 'importScripts';
   scripts: string[];
 }
 
-type CallFunctionMessage = {
+export type CallFunctionMessage = {
   type: 'callFunction';
   name: string;
   args: any[];
