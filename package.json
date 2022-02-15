@@ -1,16 +1,16 @@
 {
   "name": "@lukeschaefer/worker-bee",
-  "version": "1.0.3",
+  "version": "1.0.5",
   "description": "Tiny utility for pushing tasks into an async Web Worker",
-  "main": "dist/WorkerB.js",
-  "types": "dist/WorkerB.d.ts",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "scripts": {
     "build": "npx tsc",
     "test": "karma start"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/lukeschaefer/WorkerB.git"
+    "url": "git+https://github.com/lukeschaefer/WorkerBee.git"
   },
   "keywords": [
     "Web Worker",
@@ -20,9 +20,9 @@
   "author": "Luke Schaefer",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/lukeschaefer/WorkerB/issues"
+    "url": "https://github.com/lukeschaefer/WorkerBee/issues"
   },
-  "homepage": "https://github.com/lukeschaefer/WorkerB#readme",
+  "homepage": "https://github.com/lukeschaefer/WorkerBee#readme",
   "devDependencies": {
     "@types/jasmine": "^3.4.0",
     "jasmine-core": "^3.3.0",
