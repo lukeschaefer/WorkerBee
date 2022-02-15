@@ -47,7 +47,7 @@ export type WorkerBResponse = {
 }
 
 export type WorkerBMessage = { id?: string }
-  & (SetProperty | CallFunctionMessage | ImportScriptsMessage | GetProperty);
+  & (SetProperty | CallFunctionMessage | ImportScriptsMessage | GetProperty | SetFunctionMessage);
 
 export type SetProperty = {
   type: 'setProperty';
@@ -69,4 +69,10 @@ export type CallFunctionMessage = {
   type: 'callFunction';
   name: string;
   args: any[];
+}
+
+export type SetFunctionMessage = {
+  type: 'setFunction';
+  name: string;
+  body: string;
 }

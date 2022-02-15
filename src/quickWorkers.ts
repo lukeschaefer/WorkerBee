@@ -15,14 +15,14 @@ export function createWorker<T extends WorkerMap>(init: T): ToPromiseMap<T> & Wo
   const functionMap = {} as ToPromiseMap<T> ;
 
   Object.keys(init).forEach(name => {
-    const propertyReady = worker.sendMessage({
-      type: 'setProperty',
-      name,
-      value: init[name].toString(),
-    });
-
     // If it's a function, make a wrapper
-    if(init[name] instanceof Function) {      
+    if(init[name] instanceof Function) { 
+      let propertyReady = worker.sendMessage({
+        type: 'setFunction',
+        name,
+        body: init[name].toString(),
+      });
+
       let func = async (...args: any[])  => {
         await propertyReady;
         return await worker.sendMessage({
@@ -33,6 +33,12 @@ export function createWorker<T extends WorkerMap>(init: T): ToPromiseMap<T> & Wo
       };
       functionMap[name as keyof T] = func as ToWorkerProperty<T[keyof T]>;
     } else {
+      let propertyReady = worker.sendMessage({
+        type: 'setProperty',
+        name,
+        value: init[name],
+      });
+  
       // if it's not, write an async getter/setter wrapper
       Object.defineProperty(functionMap, name, {
         get: async function(){
